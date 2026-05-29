@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from autotrain.trainers.common import AutoTrainParams
 
@@ -25,3 +25,17 @@ class TabularParams(AutoTrainParams):
     categorical_imputer: Optional[str] = Field(None, title="Categorical imputer")
     numerical_imputer: Optional[str] = Field(None, title="Numerical imputer")
     numeric_scaler: Optional[str] = Field(None, title="Numeric scaler")
+
+    @field_validator('num_trials')
+    @classmethod
+    def validate_num_trials(cls, v):
+        if v <= 0:
+            raise ValueError('num_trials must be greater than 0')
+        return v
+
+    @field_validator('time_limit')
+    @classmethod
+    def validate_time_limit(cls, v):
+        if v <= 0:
+            raise ValueError('time_limit must be greater than 0')
+        return v

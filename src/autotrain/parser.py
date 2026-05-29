@@ -136,9 +136,15 @@ class AutoTrainConfigParser:
         self.parsed_config = self._parse_config()
 
     def _parse_config(self):
+        base_model = self.config.get("base_model")
+        if base_model is None:
+            raise ValueError("base_model is required in the configuration file")
+        project_name = self.config.get("project_name")
+        if project_name is None:
+            raise ValueError("project_name is required in the configuration file")
         params = {
-            "model": self.config["base_model"],
-            "project_name": self.config["project_name"],
+            "model": base_model,
+            "project_name": project_name,
         }
 
         if self.task == "dreambooth":
@@ -148,7 +154,7 @@ class AutoTrainConfigParser:
             params["data_path"] = self.config["data"]["path"]
 
         if self.task == "lm_training":
-            params["chat_template"] = self.config["data"]["chat_template"]
+            params["chat_template"] = self.config["data"].get("chat_template")
             if "-" in self.config["task"]:
                 params["trainer"] = self.config["task"].split("-")[1]
                 if params["trainer"] == "generic":
@@ -160,7 +166,7 @@ class AutoTrainConfigParser:
             params["trainer"] = self.config["task"].split(":")[1]
 
         if self.task != "dreambooth":
-            for k, v in self.config["data"]["column_mapping"].items():
+            for k, v in self.config["data"].get("column_mapping", {}).items():
                 params[k] = v
             params["train_split"] = self.config["data"]["train_split"]
             params["valid_split"] = self.config["data"]["valid_split"]

@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from autotrain.trainers.common import AutoTrainParams
 
@@ -69,3 +69,38 @@ class LLMTrainingParams(AutoTrainParams):
 
     # unsloth
     unsloth: bool = Field(False, title="Use unsloth")
+
+    @field_validator('lr')
+    @classmethod
+    def validate_lr(cls, v):
+        if v <= 0:
+            raise ValueError('lr must be greater than 0')
+        return v
+
+    @field_validator('epochs')
+    @classmethod
+    def validate_epochs(cls, v):
+        if v <= 0:
+            raise ValueError('epochs must be greater than 0')
+        return v
+
+    @field_validator('batch_size')
+    @classmethod
+    def validate_batch_size(cls, v):
+        if v <= 0:
+            raise ValueError('batch_size must be greater than 0')
+        return v
+
+    @field_validator('gradient_accumulation')
+    @classmethod
+    def validate_gradient_accumulation(cls, v):
+        if v <= 0:
+            raise ValueError('gradient_accumulation must be greater than 0')
+        return v
+
+    @field_validator('warmup_ratio')
+    @classmethod
+    def validate_warmup_ratio(cls, v):
+        if v < 0 or v >= 1:
+            raise ValueError('warmup_ratio must be in [0, 1)')
+        return v
