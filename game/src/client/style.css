@@ -1,0 +1,206 @@
+:root {
+  --accent: #46e3ff;
+  --accent2: #ff6ad5;
+  --bg: #0b1026;
+}
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: #fff;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  user-select: none;
+  touch-action: none;
+}
+#canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
+.hidden {
+  display: none !important;
+}
+
+/* Overlays (menu / banner) */
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 30%, rgba(70, 227, 255, 0.12), rgba(11, 16, 38, 0.92));
+  backdrop-filter: blur(3px);
+  z-index: 20;
+}
+.panel {
+  background: rgba(17, 24, 56, 0.85);
+  border: 1px solid rgba(70, 227, 255, 0.3);
+  border-radius: 18px;
+  padding: 28px 32px;
+  max-width: 440px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+h1 {
+  font-size: 40px;
+  letter-spacing: 3px;
+  margin: 0 0 4px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+h1 span {
+  display: block;
+  font-size: 40px;
+}
+.tagline {
+  opacity: 0.8;
+  margin: 0 0 18px;
+  font-size: 14px;
+}
+#nameInput {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  font-size: 16px;
+  margin-bottom: 14px;
+  text-align: center;
+}
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+button {
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  padding: 13px 16px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: transform 0.05s, background 0.15s;
+}
+button:active {
+  transform: scale(0.96);
+}
+button.primary {
+  background: linear-gradient(90deg, var(--accent), #2aa9ff);
+  color: #03121a;
+  border: none;
+}
+.howto {
+  text-align: left;
+  font-size: 13px;
+  opacity: 0.8;
+  margin: 18px 0 0;
+  padding-left: 18px;
+  line-height: 1.7;
+}
+
+/* HUD */
+#hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+#scoreboard {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 13px;
+  background: rgba(11, 16, 38, 0.55);
+  border-radius: 10px;
+  padding: 8px 10px;
+  min-width: 160px;
+}
+#scoreboard .row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 0;
+}
+#scoreboard .row.me {
+  color: var(--accent);
+  font-weight: 700;
+}
+.topbar {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  pointer-events: auto;
+}
+.topbar button {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+#status {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-left: 4px;
+}
+
+/* Touch controls */
+#touch {
+  position: fixed;
+  inset: auto 0 0 0;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: space-between;
+  padding: 0 18px;
+  z-index: 15;
+  pointer-events: none;
+}
+#touch .dpad,
+#touch .actions {
+  display: flex;
+  gap: 14px;
+  pointer-events: auto;
+}
+.tbtn {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  font-size: 26px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tbtn.jump {
+  background: rgba(70, 227, 255, 0.25);
+  width: 80px;
+  height: 80px;
+}
+.tbtn.dash {
+  background: rgba(255, 209, 102, 0.22);
+}
+.tbtn.fire {
+  background: rgba(255, 106, 213, 0.25);
+}
+
+/* Hide touch controls on devices without touch (desktop) to reduce clutter. */
+@media (hover: hover) and (pointer: fine) {
+  #touch {
+    opacity: 0.35;
+  }
+}
