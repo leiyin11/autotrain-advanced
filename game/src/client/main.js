@@ -364,10 +364,11 @@ function addBot() {
 window.addEventListener('resize', () => renderer && renderer.resize());
 document.getElementById('play-solo').addEventListener('click', () => startOffline(1));
 document.getElementById('play-coop').addEventListener('click', () => startOffline(3));
-// On a static host (e.g. GitHub Pages) there is no WebSocket server, so explain
-// rather than spin forever on "Reconnecting…".
+// On a static/CDN host (GitHub Pages, githack, jsDelivr) there is no WebSocket
+// server, so explain rather than spin forever on "Reconnecting…".
 const staticHost =
-  typeof location !== 'undefined' && /github\.io$/i.test(location.hostname);
+  typeof location !== 'undefined' &&
+  /(github\.io|githack\.com|jsdelivr\.net)$/i.test(location.hostname);
 document.getElementById('play-online').addEventListener('click', () => {
   if (staticHost) {
     const note = document.getElementById('online-note');
