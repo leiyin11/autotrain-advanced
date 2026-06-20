@@ -4,15 +4,23 @@
 
 import { createWorld, addPlayer, removePlayer, stepWorld } from '../engine/engine.js';
 import { computeBotInput } from '../engine/ai.js';
+import { LEVELS, getLevel, nextLevelIndex } from '../engine/level.js';
 import { sanitizeInput } from '../shared/protocol.js';
 import * as C from '../shared/constants.js';
 
 let botCounter = 0;
 
 export class Room {
-  constructor(level) {
-    this.level = level;
-    this.world = createWorld(level);
+  // Accepts either a campaign index (number) or a level object (back-compat).
+  constructor(levelOrIndex = 0) {
+    if (typeof levelOrIndex === 'number') {
+      this.levelIndex = levelOrIndex;
+      this.level = getLevel(levelOrIndex);
+    } else {
+      this.level = levelOrIndex;
+      this.levelIndex = Math.max(0, LEVELS.indexOf(levelOrIndex));
+    }
+    this.world = createWorld(this.level);
     this.inputs = {}; // playerId -> latest input
     this.botIds = new Set();
   }
@@ -49,14 +57,36 @@ export class Room {
     if (this.world.players[id]) this.inputs[id] = sanitizeInput(raw);
   }
 
-  restart() {
+  // Rebuild the current level, re-adding all players. `carryScore` keeps the
+  // running campaign score (used when advancing levels, not on a plain restart).
+  _reload(level, carryScore) {
     const prev = this.world;
-    this.world = createWorld(this.level);
-    // Re-add every existing player (humans and bots) at fresh spawns.
+    this.world = createWorld(level);
     for (const id in prev.players) {
       const old = prev.players[id];
-      addPlayer(this.world, { id, name: old.name, isBot: old.isBot });
+      const np = addPlayer(this.world, { id, name: old.name, isBot: old.isBot });
+      if (carryScore) {
+        np.score = old.score;
+        np.lives = old.lives;
+      }
     }
+  }
+
+  restart() {
+    this.levelIndex = 0;
+    this.level = getLevel(0);
+    this._reload(this.level, false);
+  }
+
+  // Advance to the next campaign level, carrying scores. Returns true if there
+  // was a next level, false if the campaign is already on its final level.
+  advanceLevel() {
+    const next = nextLevelIndex(this.levelIndex);
+    if (next == null) return false;
+    this.levelIndex = next;
+    this.level = getLevel(next);
+    this._reload(this.level, true);
+    return true;
   }
 
   playerCount() {

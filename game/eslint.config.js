@@ -11,6 +11,7 @@ export default [
         // Browser
         window: 'readonly',
         document: 'readonly',
+        navigator: 'readonly',
         performance: 'readonly',
         requestAnimationFrame: 'readonly',
         cancelAnimationFrame: 'readonly',

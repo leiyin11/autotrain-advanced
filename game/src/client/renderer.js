@@ -29,7 +29,9 @@ export class Renderer {
   }
 
   resize() {
-    const dpr = window.devicePixelRatio || 1;
+    // Cap device-pixel-ratio at 2: beyond that, mobile GPUs push far more pixels
+    // for no visible gain, hurting frame rate.
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const w = this.canvas.clientWidth;
     const h = this.canvas.clientHeight;
     this.canvas.width = Math.floor(w * dpr);
@@ -37,6 +39,12 @@ export class Renderer {
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.viewW = w;
     this.viewH = h;
+    // Cache the sky gradient — it only changes when the viewport height does.
+    const theme = this.level.theme || {};
+    const grad = this.ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, theme.sky || '#0b1026');
+    grad.addColorStop(1, theme.far || '#1b2350');
+    this.skyGrad = grad;
   }
 
   _follow(target) {
@@ -51,17 +59,22 @@ export class Renderer {
     if (this.level.height < this.viewH) this.camY = (this.level.height - this.viewH) / 2;
   }
 
-  render(world, selfId) {
+  render(world, selfId, particles = null) {
     const ctx = this.ctx;
+    const theme = this.level.theme || {};
     const self = world.players[selfId];
     this._follow(self);
 
-    // Sky gradient.
-    const theme = this.level.theme || {};
-    const grad = ctx.createLinearGradient(0, 0, 0, this.viewH);
-    grad.addColorStop(0, theme.sky || '#0b1026');
-    grad.addColorStop(1, theme.far || '#1b2350');
-    ctx.fillStyle = grad;
+    // Screen shake offset.
+    let shakeX = 0;
+    let shakeY = 0;
+    if (particles && particles.shake > 0) {
+      shakeX = (Math.random() - 0.5) * particles.shake;
+      shakeY = (Math.random() - 0.5) * particles.shake;
+    }
+
+    // Sky gradient (cached).
+    ctx.fillStyle = this.skyGrad || theme.sky || '#0b1026';
     ctx.fillRect(0, 0, this.viewW, this.viewH);
 
     // Parallax stars.
@@ -78,10 +91,16 @@ export class Renderer {
     ctx.globalAlpha = 1;
 
     ctx.save();
-    ctx.translate(-this.camX, -this.camY);
+    ctx.translate(-this.camX + shakeX, -this.camY + shakeY);
 
-    // Platforms.
+    // Visible-region bounds for culling (a little margin around the viewport).
+    const viewL = this.camX - 60;
+    const viewR = this.camX + this.viewW + 60;
+    const onScreen = (x, w) => x + w >= viewL && x <= viewR;
+
+    // Platforms (culled to what's on screen).
     for (const s of this.level.solids) {
+      if (!onScreen(s.x, s.w)) continue;
       ctx.fillStyle = theme.near || '#2d3a7a';
       ctx.fillRect(s.x, s.y, s.w, s.h);
       ctx.fillStyle = 'rgba(255,255,255,0.12)';
@@ -100,6 +119,7 @@ export class Renderer {
     // Pickups.
     for (const c of world.pickups) {
       if (c.collected) continue;
+      if (!onScreen(c.x, C.PICKUP_W)) continue;
       const cx = c.x + C.PICKUP_W / 2;
       const cy = c.y + C.PICKUP_H / 2 + Math.sin(Date.now() / 300 + c.x) * 3;
       if (c.kind === 'star') {
@@ -118,6 +138,7 @@ export class Renderer {
     // Enemies.
     for (const e of world.enemies) {
       if (!e.alive) continue;
+      if (!onScreen(e.x, C.ENEMY_W)) continue;
       ctx.fillStyle = '#ff5470';
       this._roundRect(e.x, e.y, C.ENEMY_W, C.ENEMY_H, 6);
       ctx.fill();
@@ -142,6 +163,18 @@ export class Renderer {
       const p = world.players[id];
       const color = PLAYER_COLORS[hashIdx(id, idx++) % PLAYER_COLORS.length];
       this._drawPlayer(p, color, id === selfId);
+    }
+
+    // Particles (drawn in world space, on top of entities).
+    if (particles) {
+      for (const pt of particles.particles) {
+        ctx.globalAlpha = Math.max(0, pt.life / pt.max);
+        ctx.fillStyle = pt.color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
     }
 
     ctx.restore();

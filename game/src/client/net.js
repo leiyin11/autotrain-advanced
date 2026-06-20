@@ -11,6 +11,7 @@ export class NetClient {
     this.connected = false;
     this.onWelcome = null;
     this.onState = null;
+    this.onLevel = null; // (levelMeta) => void  campaign progression
     this.onStatus = null; // (connected: boolean) => void
     this._shouldReconnect = true;
   }
@@ -37,6 +38,9 @@ export class NetClient {
         this.onWelcome && this.onWelcome(m);
       } else if (m.t === MSG.STATE) {
         this.onState && this.onState(m.snap);
+      } else if (m.t === MSG.LEVEL) {
+        this.level = m.level;
+        this.onLevel && this.onLevel(m.level);
       }
     };
     ws.onclose = () => {

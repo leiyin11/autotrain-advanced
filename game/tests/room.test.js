@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Room } from '../src/server/room.js';
-import { LEVEL_1 } from '../src/engine/level.js';
+import { LEVEL_1, LEVELS } from '../src/engine/level.js';
 import { resetIds } from '../src/engine/entities.js';
 import * as C from '../src/shared/constants.js';
 
@@ -56,6 +56,26 @@ describe('Room simulation', () => {
     const startX = room.world.players[id].x;
     for (let i = 0; i < 300; i++) room.tick(C.DT);
     expect(room.world.players[id].x).toBeGreaterThan(startX);
+  });
+
+  it('advances levels, carrying score, until the campaign ends', () => {
+    room.addHuman('h1', 'Grace');
+    room.world.players.h1.score = 500;
+    expect(room.levelIndex).toBe(0);
+
+    const ok = room.advanceLevel();
+    expect(ok).toBe(true);
+    expect(room.levelIndex).toBe(1);
+    expect(room.level).toBe(LEVELS[1]);
+    expect(room.world.players.h1.score).toBe(500); // carried over
+    expect(room.world.tick).toBe(0); // fresh level
+
+    // Walk to the final level.
+    while (room.advanceLevel()) {
+      /* keep advancing */
+    }
+    expect(room.levelIndex).toBe(LEVELS.length - 1);
+    expect(room.advanceLevel()).toBe(false); // no level past the last
   });
 
   it('restart resets the world but keeps all players', () => {

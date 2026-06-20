@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "server": "node src/server/index.js",
     "start": "node src/server/index.js",
+    "icons": "node scripts/gen-icons.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",

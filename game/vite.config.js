@@ -4,6 +4,9 @@ import { defineConfig } from 'vite';
 // into dist/ for production (served by the Node game server).
 export default defineConfig({
   root: '.',
+  // Relative base so the same build works at a domain root (Node server) AND
+  // under a GitHub Pages project sub-path (e.g. /autotrain-advanced/).
+  base: './',
   build: {
     outDir: 'dist',
     emptyOutDir: true,

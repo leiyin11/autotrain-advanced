@@ -9,7 +9,6 @@ import express from 'express';
 import { WebSocketServer } from 'ws';
 
 import { Room } from './room.js';
-import { LEVEL_1 } from '../engine/level.js';
 import { MSG, encode, decode, snapshot } from '../shared/protocol.js';
 import * as C from '../shared/constants.js';
 
@@ -33,7 +32,7 @@ app.get('/healthz', (_req, res) => res.json({ ok: true }));
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: '/ws' });
 
-const room = new Room(LEVEL_1);
+const room = new Room(0);
 const clients = new Map(); // ws -> playerId
 let nextClient = 0;
 
@@ -49,12 +48,18 @@ function levelMeta(level) {
   };
 }
 
+function broadcast(payload) {
+  for (const ws of clients.keys()) {
+    if (ws.readyState === ws.OPEN) ws.send(payload);
+  }
+}
+
 wss.on('connection', (ws) => {
   const id = `h-${++nextClient}`;
   clients.set(ws, id);
   room.addHuman(id, `Player ${nextClient}`);
   ws.send(
-    encode({ t: MSG.WELCOME, id, tickRate: C.TICK_RATE, level: levelMeta(LEVEL_1) })
+    encode({ t: MSG.WELCOME, id, tickRate: C.TICK_RATE, level: levelMeta(room.level) })
   );
 
   ws.on('message', (data) => {
@@ -94,15 +99,29 @@ wss.on('connection', (ws) => {
   });
 });
 
+const LEVEL_HOLD = 4 * C.TICK_RATE; // ticks to celebrate a win before advancing
 let frame = 0;
+let wonTicks = 0;
 const interval = setInterval(() => {
   room.tick(C.DT);
   frame += 1;
-  if (frame % BROADCAST_EVERY === 0) {
-    const payload = encode({ t: MSG.STATE, snap: snapshot(room.world) });
-    for (const ws of clients.keys()) {
-      if (ws.readyState === ws.OPEN) ws.send(payload);
+
+  // Campaign progression: after a short victory pause, load the next level and
+  // tell everyone about the new geometry.
+  if (room.world.status === 'won') {
+    wonTicks += 1;
+    if (wonTicks >= LEVEL_HOLD) {
+      wonTicks = 0;
+      if (room.advanceLevel()) {
+        broadcast(encode({ t: MSG.LEVEL, level: levelMeta(room.level) }));
+      }
     }
+  } else {
+    wonTicks = 0;
+  }
+
+  if (frame % BROADCAST_EVERY === 0) {
+    broadcast(encode({ t: MSG.STATE, snap: snapshot(room.world) }));
   }
 }, 1000 / C.TICK_RATE);
 

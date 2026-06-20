@@ -6,8 +6,17 @@ built with test-driven development and a fully automated CI pipeline.
 Play it in **any browser** on **desktop or mobile**, solo against CPU bots, or
 online with your team in real time.
 
-![tests](https://img.shields.io/badge/tests-49%20passing-brightgreen)
+![tests](https://img.shields.io/badge/tests-68%20passing-brightgreen)
 ![coverage](https://img.shields.io/badge/engine%20coverage-96%25-brightgreen)
+![pwa](https://img.shields.io/badge/PWA-installable%20on%20iPhone-46e3ff)
+
+## 📱 Play now
+
+**On your iPhone or any browser:** https://leiyin11.github.io/autotrain-advanced/
+
+Add it to your Home Screen (Share → *Add to Home Screen*) to play full-screen
+like a native app — it even works offline. Single-player and vs-CPU run entirely
+in the browser; online multiplayer needs the self-hosted server (below).
 
 ---
 
@@ -24,13 +33,17 @@ online with your team in real time.
 | Fixed feel | **Variable jump height**, smooth follow camera, parallax starfield |
 
 - 🎮 **One codebase, every device** — responsive HTML5 canvas, on-screen touch
-  pad on phones, keyboard on desktop.
+  pad on phones, keyboard on desktop, installable PWA with offline support.
+- 🗺️ **A 3-level campaign** — Nebula Gardens → Crystal Caverns → Solar Spire,
+  with carried-over scoring and automatic level progression.
 - 🤝 **Play with people or computers** — humans and AI bots are fully
   interchangeable in the simulation.
-- 🧪 **Test-driven** — a deterministic, DOM-free engine core with 49 unit,
-  integration and end-to-end tests.
-- 🤖 **Fully automated** — lint + multi-Node test matrix + production build on
-  every push via GitHub Actions.
+- 🔊 **Juice** — procedural Web Audio SFX (no asset files), particle bursts and
+  screen shake on stomps, hits and wins.
+- 🧪 **Test-driven** — a deterministic, DOM-free engine core with 68 unit,
+  integration and end-to-end tests (incl. an AI-beatability test per level).
+- 🤖 **Fully automated** — lint + multi-Node test matrix + production build +
+  GitHub Pages deploy on every push via GitHub Actions.
 
 ## 🕹️ Controls
 

@@ -13,6 +13,7 @@ export const MSG = {
   // server -> client
   WELCOME: 'welcome',
   STATE: 'state',
+  LEVEL: 'level', // a new level was loaded (campaign progression)
   PONG: 'pong',
 };
 
