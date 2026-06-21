@@ -1,0 +1,29 @@
+# Render Blueprint — one-click deploy of the Nebula Knights multiplayer server.
+#
+# This runs the authoritative Node server, which ALSO serves the game client, so
+# the resulting URL is everything you need: open it to play, share it with your
+# team, and you all join the same live match (add CPU bots with "+ CPU").
+#
+# How to use:
+#   1. Push this repo to GitHub (already done).
+#   2. In the Render dashboard: New +  ->  Blueprint  ->  pick this repo.
+#   3. Render reads this file and creates the service. Click Apply.
+#   4. Wait for the first build, then open the https://<name>.onrender.com URL.
+#
+# Note: the free plan sleeps after ~15 min idle and cold-starts in ~50s on the
+# next visit. Upgrade to a paid instance if you want it always-on.
+
+services:
+  - type: web
+    name: nebula-knights
+    runtime: node
+    rootDir: game
+    plan: free
+    # Build the production client bundle into game/dist, which the server serves.
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 22.11.0
