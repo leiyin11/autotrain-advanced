@@ -3,7 +3,8 @@ name: Deploy Nebula Knights to GitHub Pages
 # Builds the static game client and publishes it to GitHub Pages so it can be
 # played in any mobile/desktop browser (single-player + CPU bots; online
 # multiplayer requires self-hosting the Node server).
-# Pages is enabled in repo settings; this run publishes the build.
+# Pages is enabled (Source = GitHub Actions); republish so the game build
+# becomes the active deployment.
 on:
   push:
     branches: [claude/multiplayer-mario-game-9b42eg]
